@@ -34,7 +34,7 @@
         <ul></ul>
     </div>
     
-    <div class="lnb-api hidden"><h3>Classes</h3><ul><li><a href="EventGetter.html">EventGetter</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="EventGetter_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="EventGetter.html#_intervalFunction">_intervalFunction</a></li><li><a href="EventGetter.html#failedRequestHandler">failedRequestHandler</a></li><li><a href="EventGetter.html#getFailedStatus">getFailedStatus</a></li><li><a href="EventGetter.html#getLatestLogLine">getLatestLogLine</a></li><li><a href="EventGetter.html#getNewLogs">getNewLogs</a></li><li><a href="EventGetter.html#setLock">setLock</a></li></ul></div></li></ul></div>
+    <div class="lnb-api hidden"><h3>Classes</h3><ul><li><a href="EventGetter.html">EventGetter</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="EventGetter_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="EventGetter.html#_intervalFunction">_intervalFunction</a></li><li><a href="EventGetter.html#failedRequestHandler">failedRequestHandler</a></li><li><a href="EventGetter.html#getFailedStatus">getFailedStatus</a></li><li><a href="EventGetter.html#getLatestLogLine">getLatestLogLine</a></li><li><a href="EventGetter.html#getNewLogs">getNewLogs</a></li><li><a href="EventGetter.html#setLock">setLock</a></li></ul></div></li><li><a href="RedisConnector.html">RedisConnector</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="RedisConnector_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="RedisConnector.html#addToEventQueue">addToEventQueue</a></li><li><a href="RedisConnector.html#get">get</a></li><li><a href="RedisConnector.html#set">set</a></li></ul></div></li></ul></div>
 </nav>
 <div id="resizer"></div>
 
@@ -48,7 +48,7 @@
         <article>
             <pre class="prettyprint source linenums"><code>const SdtdApi = require('7daystodie-api-wrapper');
 const logger = require('./Logger');
-const redisClient = require('./Redis');
+const redisClient = require('./RedisConnector');
 const _ = require('lodash');
 const handleLogLine = require('./util/handleLogLine');
 
@@ -79,7 +79,7 @@ class EventGetter {
      */
     async _intervalFunction() {
         for (const server of this.servers.values()) {
-            let serverLock = await redisClient.client.get(`server:${server.id}:lock`);
+            let serverLock = await redisClient.get('lock', server);
             if (_.isNull(serverLock)) {
                 await this.getNewLogs(server);
             }
@@ -97,7 +97,7 @@ class EventGetter {
             throw new Error(`Server cannot be undefined`);
         }
 
-        let currentFails = await redisClient.client.get(`server:${server.id}:failedCounter`);
+        let currentFails = await redisClient.get(`failedCounter`, server);
 
         if (_.isNull(currentFails)) {
             currentFails = 0;
@@ -106,12 +106,12 @@ class EventGetter {
         currentFails = parseInt(currentFails);
 
         if (currentFails > 3) {
-            await redisClient.client.set(`server:${server.id}:failed`, 1);
+            await redisClient.set(`failed`, 1, server);
             await this.setLock(server, this.failedInterval);
             logger.info(`Server ${server.id} - ${server.name} has failed ${currentFails} times. Setting failed status to true. ${error}`);
         }
 
-        await redisClient.client.set(`server:${server.id}:failedCounter`, currentFails + 1);
+        await redisClient.set(`failedCounter`, currentFails + 1, server);
         return;
     }
 
@@ -120,13 +120,13 @@ class EventGetter {
      * @param {Object} server 
      */
     async getFailedStatus(server) {
-        let response = await redisClient.client.get(`server:${server.id}:failed`);
+        let response = await redisClient.get(`failed`, server);
         return response;
     }
 
     async resetFailedStatus(server) {
-        await redisClient.client.set(`server:${server.id}:failedCounter`, 0);
-        await redisClient.client.set(`server:${server.id}:failed`, 0);
+        await redisClient.set(`failedCounter`, 0, server);
+        await redisClient.set(`failed`, 0, server);
     }
 
 
@@ -137,7 +137,7 @@ class EventGetter {
      * @param { Number } duration How many miliseconds between every request.
      */
     setLock(server, duration) {
-        return redisClient.client.set(`server:${server.id}:lock`, 1, 'PX', duration);
+        return redisClient.set(`lock`, 1, server, duration);
     }
 
     /**
@@ -170,7 +170,11 @@ class EventGetter {
         _.each(newLogs.entries, async line => {
             let parsedLogLine = handleLogLine(line);
             if (parsedLogLine.type) {
-                logger.info(JSON.stringify(parsedLogLine))
+                parsedLogLine.server = {
+                    id: server.id,
+                    name: server.name
+                }
+                redisClient.addToEventQueue(parsedLogLine)
             }
         });
 

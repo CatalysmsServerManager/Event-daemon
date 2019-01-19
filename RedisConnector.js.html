@@ -1,8 +1,10 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Home | Event daemon</title>
+    <title>Source: RedisConnector.js | Event daemon</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -42,19 +44,89 @@
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Redis = require('ioredis');
+const _ = require('lodash');
 
+/**
+ * Controller class for redis
+ */
+class RedisConnector {
+    constructor() {
+        this.client = new Redis({
+            keyPrefix: 'eventDaemon:'
+        });
+    }
 
+    /**
+     * Adds an event to the redis queue, ready to be picked up by the game daemon
+     * @param {Object} event 
+     * @returns { Promise&lt;Number>} Length of the queue after insertion of event.
+     */
 
+    async addToEventQueue(event) {
+        if (_.isUndefined(event)) {
+            throw new Error('Must provide a event argument');
+        }
 
+        if (_.isUndefined(event.server)) {
+            throw new Error('Must provide a server property');
+        }
 
+        let queueLength = await this.client.rpush(`eventQueue`, JSON.stringify(event));
+        return parseInt(queueLength);
+    }
 
+    /**
+     * Sets a key in redis
+     * @param { String } key Name of the value
+     * @param { Object } data JSON deserializable data
+     * @param { Object } server
+     * @param { Number } expiry ms before key gets deleted
+     * @returns { Object } response from redis server
+     */
 
+    async set(key, data, server, expiry) {
 
+        if (_.isUndefined(key) || _.isUndefined(data) || _.isUndefined(server) || _.isUndefined(server.id)) {
+            throw new Error(`Invalid inputs. key, data, server and server.id are all required`);
+        }
 
-    
+        let parsedData = data;
 
+        if (!_.isString(data)) {
+            parsedData = JSON.stringify(data);
+        }
+        let result
+        if (expiry) {
+            result = await this.client.set(`server:${server.id}:${key}`, parsedData, 'PX', expiry);
+        } else {
+            result = await this.client.set(`server:${server.id}:${key}`, parsedData);
+        }
+        return result;
+    }
 
+    /**
+     * Gets a key from redis
+     * @param { String } key 
+     * @param { Object } server 
+     * @returns { String } Response from redis server
+     */
+    async get(key, server) {
+        if (_.isUndefined(key) || _.isUndefined(server) || _.isUndefined(server.id)) {
+            throw new Error(`Invalid inputs, key, server and server.id are all required`);
+        }
+        let result = await this.client.get(`server:${server.id}:${key}`);
+        return result;
+    }
+}
 
+const client = new RedisConnector();
+
+module.exports = client;</code></pre>
+        </article>
+    </section>
 
 
 
@@ -71,7 +143,7 @@
 <script src="scripts/linenumber.js"></script>
 
     <script>
-        var id = 'package:undefined_sub'.replace(/"/g, '_');
+        var id = '_sub'.replace(/"/g, '_');
         var selectedApi = document.getElementById(id); // do not use jquery selector
         var $selectedApi = $(selectedApi);
 

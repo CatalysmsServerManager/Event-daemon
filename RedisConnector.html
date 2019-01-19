@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Class: EventGetter | Event daemon</title>
+    <title>Class: RedisConnector | Event daemon</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -46,7 +46,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>EventGetter<span class="signature">(serverModel)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>RedisConnector<span class="signature">()</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Controller class for redis</div>
         
     
 </header>
@@ -59,14 +61,14 @@
 
 <dt>
     
-        <h4 class="name" id="EventGetter">
+        <h4 class="name" id="RedisConnector">
             
-                new <span class="type-signature"></span>EventGetter<span class="signature">(serverModel)</span><span class="type-signature"></span>
+                new <span class="type-signature"></span>RedisConnector<span class="signature">()</span><span class="type-signature"></span>
                 
             
             <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line12">line 12</a></code>
+                <code><a href="RedisConnector.js.html">RedisConnector.js</a></code>,
+                <code><a href="RedisConnector.js.html#line7">line 7</a></code>
             </div>
             
         </h4>
@@ -84,56 +86,6 @@
 
     
 
-    
-    <div class="container-params">
-        <h5>Parameters:</h5>
-        
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>serverModel</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    </div>
     
 
     
@@ -215,14 +167,14 @@
 
 <dt>
     
-        <h4 class="name" id="_intervalFunction">
+        <h4 class="name" id="addToEventQueue">
             
-                <span class="type-signature"><span class="icon green">async</span> </span>_intervalFunction<span class="signature">()</span><span class="type-signature"></span>
+                <span class="type-signature"><span class="icon green">async</span> </span>addToEventQueue<span class="signature">(event)</span><span class="type-signature"> &rarr; {Promise.&lt;Number>}</span>
                 
             
             <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line32">line 32</a></code>
+                <code><a href="RedisConnector.js.html">RedisConnector.js</a></code>,
+                <code><a href="RedisConnector.js.html#line20">line 20</a></code>
             </div>
             
         </h4>
@@ -234,7 +186,65 @@
 
     
     <div class="description">
-        Heartbeat of this class
+        Adds an event to the redis queue, ready to be picked up by the game daemon
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+    <div class="container-params">
+        <h5>Parameters:</h5>
+        
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     </div>
     
 
@@ -249,13 +259,26 @@
     
 
     
+    <div class="container-returns">
+        <h5>Returns:</h5>
+        
+                
 
-    
 
-    
 
-    
+<span class="param-type">Promise.&lt;Number></span>
 
+
+
+
+
+- Length of the queue after insertion of event.
+
+
+
+
+            
+    </div>
     
 
     
@@ -304,14 +327,14 @@
 
 <dt>
     
-        <h4 class="name" id="failedRequestHandler">
+        <h4 class="name" id="get">
             
-                <span class="type-signature"><span class="icon green">async</span> </span>failedRequestHandler<span class="signature">(server)</span><span class="type-signature"></span>
+                <span class="type-signature"><span class="icon green">async</span> </span>get<span class="signature">(key, server)</span><span class="type-signature"> &rarr; {String}</span>
                 
             
             <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line46">line 46</a></code>
+                <code><a href="RedisConnector.js.html">RedisConnector.js</a></code>,
+                <code><a href="RedisConnector.js.html#line68">line 68</a></code>
             </div>
             
         </h4>
@@ -323,8 +346,7 @@
 
     
     <div class="description">
-        When a request to a server fails, we call this function
-After consecutive failed requests, we slow down how often we retry
+        Gets a key from redis
     </div>
     
 
@@ -356,6 +378,29 @@ After consecutive failed requests, we slow down how often we retry
     </thead>
 
     <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
     
 
         <tr>
@@ -397,144 +442,26 @@ After consecutive failed requests, we slow down how often we retry
     
 
     
-
-    
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-</dd>
-
-            
-                
-
-<dt>
-    
-        <h4 class="name" id="getFailedStatus">
-            
-                <span class="type-signature"><span class="icon green">async</span> </span>getFailedStatus<span class="signature">(server)</span><span class="type-signature"></span>
-                
-            
-            <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line74">line 74</a></code>
-            </div>
-            
-        </h4>
-
+    <div class="container-returns">
+        <h5>Returns:</h5>
         
-    
-</dt>
-<dd>
+                
 
-    
-    <div class="description">
-        Get the failed status for a server
+
+
+<span class="param-type">String</span>
+
+
+
+
+
+- Response from redis server
+
+
+
+
+            
     </div>
-    
-
-    
-
-    
-
-    
-
-    
-    <div class="container-params">
-        <h5>Parameters:</h5>
-        
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>server</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     
 
     
@@ -583,14 +510,14 @@ After consecutive failed requests, we slow down how often we retry
 
 <dt>
     
-        <h4 class="name" id="getLatestLogLine">
+        <h4 class="name" id="set">
             
-                <span class="type-signature"><span class="icon green">async</span> </span>getLatestLogLine<span class="signature">(server)</span><span class="type-signature"></span>
+                <span class="type-signature"><span class="icon green">async</span> </span>set<span class="signature">(key, data, server, expiry)</span><span class="type-signature"> &rarr; {Object}</span>
                 
             
             <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line143">line 143</a></code>
+                <code><a href="RedisConnector.js.html">RedisConnector.js</a></code>,
+                <code><a href="RedisConnector.js.html#line42">line 42</a></code>
             </div>
             
         </h4>
@@ -602,8 +529,7 @@ After consecutive failed requests, we slow down how often we retry
 
     
     <div class="description">
-        Get the log line # of the server
-We use this to get the latest lines so we don't start with logs from server boot
+        Sets a key in redis
     </div>
     
 
@@ -639,13 +565,13 @@ We use this to get the latest lines so we don't start with logs from server boot
 
         <tr>
             
-                <td class="name"><code>server</code></td>
+                <td class="name"><code>key</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">String</span>
 
 
             
@@ -655,130 +581,14 @@ We use this to get the latest lines so we don't start with logs from server boot
 
             
 
-            <td class="description last"></td>
+            <td class="description last">Name of the value</td>
         </tr>
 
-    
-    </tbody>
-</table>
-
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-</dd>
-
-            
-                
-
-<dt>
-    
-        <h4 class="name" id="getNewLogs">
-            
-                <span class="type-signature"><span class="icon green">async</span> </span>getNewLogs<span class="signature">(server)</span><span class="type-signature"></span>
-                
-            
-            <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line99">line 99</a></code>
-            </div>
-            
-        </h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the newest log lines for a server
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-    <div class="container-params">
-        <h5>Parameters:</h5>
-        
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
         <tr>
             
-                <td class="name"><code>server</code></td>
+                <td class="name"><code>data</code></td>
             
 
             <td class="type">
@@ -794,126 +604,9 @@ We use this to get the latest lines so we don't start with logs from server boot
 
             
 
-            <td class="description last"></td>
+            <td class="description last">JSON deserializable data</td>
         </tr>
 
-    
-    </tbody>
-</table>
-
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-</dd>
-
-            
-                
-
-<dt>
-    
-        <h4 class="name" id="setLock">
-            
-                <span class="type-signature"></span>setLock<span class="signature">(server, duration)</span><span class="type-signature"></span>
-                
-            
-            <div class="container-source members">
-                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line91">line 91</a></code>
-            </div>
-            
-        </h4>
-
-        
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        After getting new log lines for a server, we set a value in redis with an expire
-Use this to check if the timeout to get new logs has passed
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-    <div class="container-params">
-        <h5>Parameters:</h5>
-        
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
         <tr>
@@ -941,7 +634,7 @@ Use this to check if the timeout to get new logs has passed
 
         <tr>
             
-                <td class="name"><code>duration</code></td>
+                <td class="name"><code>expiry</code></td>
             
 
             <td class="type">
@@ -957,7 +650,7 @@ Use this to check if the timeout to get new logs has passed
 
             
 
-            <td class="description last">How many miliseconds between every request.</td>
+            <td class="description last">ms before key gets deleted</td>
         </tr>
 
     
@@ -977,6 +670,27 @@ Use this to check if the timeout to get new logs has passed
 
     
 
+    
+    <div class="container-returns">
+        <h5>Returns:</h5>
+        
+                
+
+
+
+<span class="param-type">Object</span>
+
+
+
+
+
+- response from redis server
+
+
+
+
+            
+    </div>
     
 
     
@@ -1045,7 +759,7 @@ Use this to check if the timeout to get new logs has passed
 <script src="scripts/linenumber.js"></script>
 
     <script>
-        var id = 'EventGetter_sub'.replace(/"/g, '_');
+        var id = 'RedisConnector_sub'.replace(/"/g, '_');
         var selectedApi = document.getElementById(id); // do not use jquery selector
         var $selectedApi = $(selectedApi);
 
