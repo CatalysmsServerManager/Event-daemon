@@ -8,26 +8,26 @@ before_install:
   - mysql -e 'CREATE DATABASE eventdaemon;'
 install:
   -  npm install
-jobs:  
+jobs:
   include:
-    - stage: "Validate & tests"   
-      name: "ESLint"            
-      script: 
-        - npm run lint             
-      name: "Tests"            
-      script: 
+    - stage: "Validate & tests"
+      name: "ESLint"
+      script:
+        - npm run lint 
+    - name: "Tests"
+      script:
         - npm test
-      name: "Coverage"
-        script:
+    - name: "Coverage"
+      script:
         - npm run coverage
     - stage: Deploy
       name: "Deploy docs to GH pages"
-      script: 
+      script:
         - npm run docs
       deploy:
         provider: pages
         skip-cleanup: true
-        github-token: $GH_TOKEN 
+        github-token: $GH_TOKEN
         keep-history: true
         on:
           branch: master
