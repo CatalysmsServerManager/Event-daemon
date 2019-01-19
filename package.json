@@ -1,0 +1,21 @@
+{
+  "name": "eventdaemon",
+  "version": "0.0.1",
+  "description": "Gets events from a gameserver and transmits them via a websocket",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "catalysm",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "7daystodie-api-wrapper": "^1.2.1",
+    "dotenv": "^6.2.0",
+    "geoip-ultralight": "^0.1.5",
+    "ioredis": "^4.3.0",
+    "lodash": "^4.17.11",
+    "mysql2": "^1.6.4",
+    "sequelize": "^4.42.0",
+    "winston": "^3.1.0"
+  }
+}
