@@ -17,8 +17,6 @@ jobs:
     - name: "Tests"
       script:
         - npm test
-    - name: "Coverage"
-      script:
         - npm run coverage
     - stage: Deploy
       name: "Deploy docs to GH pages"
