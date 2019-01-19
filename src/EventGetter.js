@@ -1,14 +1,13 @@
 const SdtdApi = require('7daystodie-api-wrapper');
 const logger = require('./Logger');
 const redisClient = require('./Redis');
-const Server = require('./model/Server');
 const _ = require('lodash');
 const handleLogLine = require('./util/handleLogLine');
 
 class EventGetter {
     /**
      * 
-     * @param { Server } serverModel 
+     * @param { Object } serverModel 
      */
     constructor(serverModel) {
         this.servers = new Map();
@@ -62,7 +61,7 @@ class EventGetter {
             await redisClient.client.set(`server:${server.id}:failed`, 1);
             await this.setLock(server, this.failedInterval);
             logger.info(`Server ${server.id} - ${server.name} has failed ${currentFails} times. Setting failed status to true. ${error}`);
-        };
+        }
 
         await redisClient.client.set(`server:${server.id}:failedCounter`, currentFails + 1);
         return;

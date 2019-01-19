@@ -6,7 +6,8 @@
   "scripts": {
     "test": "nyc node_modules/mocha/bin/_mocha --reporter mochawesome --reporter-options reportDir=./test/output/mochawesome --exit",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
+    "docs": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
+    "lint": "./node_modules/.bin/eslint src/"
   },
   "author": "catalysm",
   "license": "GPL-3.0",
