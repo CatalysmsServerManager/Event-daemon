@@ -84,10 +84,7 @@
             }
         ],
         "line-comment-position": "error",
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
+        "linebreak-style": "off",
         "lines-around-comment": "off",
         "lines-around-directive": "error",
         "lines-between-class-members": [
