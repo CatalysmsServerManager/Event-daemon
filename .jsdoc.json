@@ -1,0 +1,13 @@
+{
+    "source": {
+        "include": [ "src/"]
+    },
+    "opts": {
+        "template": "node_modules/tui-jsdoc-template"
+    },
+    "templates": {
+        "name": "Event daemon",
+        "footerText": "Part of CSMM - © Catalysm"
+    }
+}
+

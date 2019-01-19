@@ -4,9 +4,25 @@ node_js:
 services:
   - mysql
 before_install:
-  - mysql -e 'CREATE DATABASE test;'
+  - mysql -e 'CREATE DATABASE eventdaemon;'
 install:
   -  npm install
-script:
-  - npm test
-  - npm run coverage
+jobs:  
+  include:
+    - stage: "Tests"                
+      name: "Tests"            
+      script: 
+        - npm test
+        - npm run coverage
+    - stage: Deploy
+      name: "Deploy docs to GH pages"
+      script: 
+        - npm run docs
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GH_TOKEN 
+        keep-history: true
+        on:
+          branch: master
+        local-dir: out/
