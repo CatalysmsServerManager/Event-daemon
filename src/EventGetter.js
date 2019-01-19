@@ -1,6 +1,6 @@
 const SdtdApi = require('7daystodie-api-wrapper');
 const logger = require('./Logger');
-const redisClient = require('./Redis');
+const redisClient = require('./RedisConnector');
 const _ = require('lodash');
 const handleLogLine = require('./util/handleLogLine');
 
@@ -31,7 +31,7 @@ class EventGetter {
      */
     async _intervalFunction() {
         for (const server of this.servers.values()) {
-            let serverLock = await redisClient.client.get(`server:${server.id}:lock`);
+            let serverLock = await redisClient.get('lock', server);
             if (_.isNull(serverLock)) {
                 await this.getNewLogs(server);
             }
@@ -49,7 +49,7 @@ class EventGetter {
             throw new Error(`Server cannot be undefined`);
         }
 
-        let currentFails = await redisClient.client.get(`server:${server.id}:failedCounter`);
+        let currentFails = await redisClient.get(`failedCounter`, server);
 
         if (_.isNull(currentFails)) {
             currentFails = 0;
@@ -58,12 +58,12 @@ class EventGetter {
         currentFails = parseInt(currentFails);
 
         if (currentFails > 3) {
-            await redisClient.client.set(`server:${server.id}:failed`, 1);
+            await redisClient.set(`failed`, 1, server);
             await this.setLock(server, this.failedInterval);
             logger.info(`Server ${server.id} - ${server.name} has failed ${currentFails} times. Setting failed status to true. ${error}`);
         }
 
-        await redisClient.client.set(`server:${server.id}:failedCounter`, currentFails + 1);
+        await redisClient.set(`failedCounter`, currentFails + 1, server);
         return;
     }
 
@@ -72,13 +72,13 @@ class EventGetter {
      * @param {Object} server 
      */
     async getFailedStatus(server) {
-        let response = await redisClient.client.get(`server:${server.id}:failed`);
+        let response = await redisClient.get(`failed`, server);
         return response;
     }
 
     async resetFailedStatus(server) {
-        await redisClient.client.set(`server:${server.id}:failedCounter`, 0);
-        await redisClient.client.set(`server:${server.id}:failed`, 0);
+        await redisClient.set(`failedCounter`, 0, server);
+        await redisClient.set(`failed`, 0, server);
     }
 
 
@@ -89,7 +89,7 @@ class EventGetter {
      * @param { Number } duration How many miliseconds between every request.
      */
     setLock(server, duration) {
-        return redisClient.client.set(`server:${server.id}:lock`, 1, 'PX', duration);
+        return redisClient.set(`lock`, 1, server, duration);
     }
 
     /**
@@ -122,7 +122,11 @@ class EventGetter {
         _.each(newLogs.entries, async line => {
             let parsedLogLine = handleLogLine(line);
             if (parsedLogLine.type) {
-                logger.info(JSON.stringify(parsedLogLine))
+                parsedLogLine.server = {
+                    id: server.id,
+                    name: server.name
+                }
+                redisClient.addToEventQueue(parsedLogLine)
             }
         });
 
