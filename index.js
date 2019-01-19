@@ -36,7 +36,7 @@ const eventGetter = new EventGetter(Server);
 
 const app = {
     datbaseConnection: sequelize,
-    eventGetter: eventGetter,
+    eventGetter,
     models: {
         server: Server
     }

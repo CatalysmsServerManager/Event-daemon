@@ -3,20 +3,22 @@ node_js:
   - 10
 services:
   - mysql
+  - redis-server
 before_install:
   - mysql -e 'CREATE DATABASE eventdaemon;'
 install:
   -  npm install
 jobs:  
   include:
-    - stage: "Lint"                
+    - stage: "Validate & tests"   
       name: "ESLint"            
       script: 
-        - npm run lint
-    - stage: "Tests"                
+        - npm run lint             
       name: "Tests"            
       script: 
         - npm test
+      name: "Coverage"
+        script:
         - npm run coverage
     - stage: Deploy
       name: "Deploy docs to GH pages"
