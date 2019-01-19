@@ -31,21 +31,15 @@ sequelize
 sequelize.sync()
     .then(() => logger.info("Synchronized model definitions"))
 
-const sleep = sec => new Promise(resolve => setTimeout(resolve, sec * 1000));
+const Server = new ServerStatic(sequelize);
+const eventGetter = new EventGetter(Server);
 
-async function main() {
-    const Server = new ServerStatic(sequelize);
-    const eventGetter = new EventGetter(Server);
-
-/*     await sleep(4);
-    pub.rpush('events', 'event1');
-    pub.publish(channel, 'update');
-
-    await sleep(7);
-    pub.rpush('events', 'event2');
-    pub.publish(channel, 'update'); */
-
-
+const app = {
+    datbaseConnection: sequelize,
+    eventGetter: eventGetter,
+    models: {
+        server: Server
+    }
 }
 
-main();
+module.exports = app;
