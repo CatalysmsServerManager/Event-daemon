@@ -43,3 +43,7 @@ node_modules/
 .env.test
 
 logs/*.log
+
+# test output
+test/output
+coverage.lcov
