@@ -54,6 +54,11 @@ const main = function main() {
     
 }) */
 
+process.on('unhandledRejection', (reason, p) => {
+    logger.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
+    throw new Error(reason);
+  });
+
 const app = main();
 
 module.exports = app;
