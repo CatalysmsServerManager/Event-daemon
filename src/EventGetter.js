@@ -52,18 +52,17 @@ class EventGetter {
         let currentFails = await redisClient.get(`failedCounter`, server);
 
         if (_.isNull(currentFails)) {
-            currentFails = 0;
+            currentFails = 1;
         }
-
-        currentFails = parseInt(currentFails);
+        // Increment the counter
+        currentFails = parseInt(currentFails) + 1;
 
         if (currentFails > 3) {
-            await redisClient.set(`failed`, 1, server);
-            await this.setLock(server, this.failedInterval);
             logger.info(`Server ${server.id} - ${server.name} has failed ${currentFails} times. Setting failed status to true. ${error}`);
+            this.activateFailed(server);
         }
 
-        await redisClient.set(`failedCounter`, currentFails + 1, server);
+        await redisClient.set(`failedCounter`, currentFails, server);
         return;
     }
 
@@ -73,12 +72,35 @@ class EventGetter {
      */
     async getFailedStatus(server) {
         let response = await redisClient.get(`failed`, server);
-        return response;
+        switch (response) {
+            case 'true':
+                return true;
+            case 'false':
+                return false;
+            case null:
+                return false;
+            default:
+                throw new Error(`Invalid data for failed status in redis`);
+        }
     }
 
+    /**
+     * Set a servers failed status to true & set a longer delay before we check for new logs again.
+     * @param {Object} server 
+     */
+    async activateFailed(server) {
+        await redisClient.set(`failed`, true, server);
+        await this.setLock(server, this.failedInterval);
+
+    }
+
+    /**
+     * Server is reachable again, set counter & status to 0
+     * @param {Object} server 
+     */
     async resetFailedStatus(server) {
         await redisClient.set(`failedCounter`, 0, server);
-        await redisClient.set(`failed`, 0, server);
+        await redisClient.set(`failed`, false, server);
     }
 
 
@@ -114,7 +136,7 @@ class EventGetter {
             }, server.latestLogLine);
 
         } catch (error) {
-            this.failedRequestHandler(server,error);
+            this.failedRequestHandler(server, error);
             return
         }
         server.latestLogLine = server.latestLogLine + parseInt(newLogs.entries.length);
