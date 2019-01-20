@@ -122,11 +122,11 @@ class EventGetter {
      * @param {Object} server 
      */
     async getNewLogs(server) {
-        logger.verbose(`Get new logs for server ${server.id} - ${server.name}`);
+        logger.verbose(`Getting new logs for server ${server.id} - ${server.name}`);
         await this.setLock(server, this.defaultInterval);
         server.latestLogLine = await this.getLatestLogLine(server);
 
-        if (_.isUndefined(server.latestLogLine)) {
+        if (_.isUndefined(server.latestLogLine) || _.isNull(server.latestLogLine)) {
             server.latestLogLine = await this.updateLatestLogLine(server);
         }
 
