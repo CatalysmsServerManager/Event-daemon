@@ -27,6 +27,7 @@ class RedisConnector {
         }
 
         let queueLength = await this.client.rpush(`eventQueue`, JSON.stringify(event));
+        await this.client.publish('eventQueue', 'new');
         return parseInt(queueLength);
     }
 
