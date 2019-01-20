@@ -32,7 +32,7 @@
         <ul></ul>
     </div>
     
-    <div class="lnb-api hidden"><h3>Classes</h3><ul><li><a href="EventGetter.html">EventGetter</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="EventGetter_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="EventGetter.html#_intervalFunction">_intervalFunction</a></li><li><a href="EventGetter.html#failedRequestHandler">failedRequestHandler</a></li><li><a href="EventGetter.html#getFailedStatus">getFailedStatus</a></li><li><a href="EventGetter.html#getLatestLogLine">getLatestLogLine</a></li><li><a href="EventGetter.html#getNewLogs">getNewLogs</a></li><li><a href="EventGetter.html#setLock">setLock</a></li></ul></div></li><li><a href="RedisConnector.html">RedisConnector</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="RedisConnector_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="RedisConnector.html#addToEventQueue">addToEventQueue</a></li><li><a href="RedisConnector.html#get">get</a></li><li><a href="RedisConnector.html#set">set</a></li></ul></div></li></ul></div>
+    <div class="lnb-api hidden"><h3>Classes</h3><ul><li><a href="EventGetter.html">EventGetter</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="EventGetter_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="EventGetter.html#_intervalFunction">_intervalFunction</a></li><li><a href="EventGetter.html#activateFailed">activateFailed</a></li><li><a href="EventGetter.html#failedRequestHandler">failedRequestHandler</a></li><li><a href="EventGetter.html#getFailedStatus">getFailedStatus</a></li><li><a href="EventGetter.html#getLatestLogLine">getLatestLogLine</a></li><li><a href="EventGetter.html#getNewLogs">getNewLogs</a></li><li><a href="EventGetter.html#resetFailedStatus">resetFailedStatus</a></li><li><a href="EventGetter.html#setLock">setLock</a></li></ul></div></li><li><a href="RedisConnector.html">RedisConnector</a><button type="button" class="hidden toggle-subnav btn btn-link">  <span class="glyphicon glyphicon-plus"></span></button><div class="hidden" id="RedisConnector_sub"><div class="member-type">Methods</div><ul class="inner"><li><a href="RedisConnector.html#addToEventQueue">addToEventQueue</a></li><li><a href="RedisConnector.html#get">get</a></li><li><a href="RedisConnector.html#set">set</a></li></ul></div></li></ul></div>
 </nav>
 <div id="resizer"></div>
 
@@ -304,6 +304,145 @@
 
 <dt>
     
+        <h4 class="name" id="activateFailed">
+            
+                <span class="type-signature"><span class="icon green">async</span> </span>activateFailed<span class="signature">(server)</span><span class="type-signature"></span>
+                
+            
+            <div class="container-source members">
+                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
+                <code><a href="EventGetter.js.html#line91">line 91</a></code>
+            </div>
+            
+        </h4>
+
+        
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Set a servers failed status to true & set a longer delay before we check for new logs again.
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+    <div class="container-params">
+        <h5>Parameters:</h5>
+        
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>server</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+</dd>
+
+            
+                
+
+<dt>
+    
         <h4 class="name" id="failedRequestHandler">
             
                 <span class="type-signature"><span class="icon green">async</span> </span>failedRequestHandler<span class="signature">(server)</span><span class="type-signature"></span>
@@ -451,7 +590,7 @@ After consecutive failed requests, we slow down how often we retry
             
             <div class="container-source members">
                 <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line74">line 74</a></code>
+                <code><a href="EventGetter.js.html#line73">line 73</a></code>
             </div>
             
         </h4>
@@ -590,7 +729,7 @@ After consecutive failed requests, we slow down how often we retry
             
             <div class="container-source members">
                 <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line143">line 143</a></code>
+                <code><a href="EventGetter.js.html#line165">line 165</a></code>
             </div>
             
         </h4>
@@ -730,7 +869,7 @@ We use this to get the latest lines so we don't start with logs from server boot
             
             <div class="container-source members">
                 <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line99">line 99</a></code>
+                <code><a href="EventGetter.js.html#line121">line 121</a></code>
             </div>
             
         </h4>
@@ -862,6 +1001,145 @@ We use this to get the latest lines so we don't start with logs from server boot
 
 <dt>
     
+        <h4 class="name" id="resetFailedStatus">
+            
+                <span class="type-signature"><span class="icon green">async</span> </span>resetFailedStatus<span class="signature">(server)</span><span class="type-signature"></span>
+                
+            
+            <div class="container-source members">
+                <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
+                <code><a href="EventGetter.js.html#line101">line 101</a></code>
+            </div>
+            
+        </h4>
+
+        
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Server is reachable again, set counter & status to 0
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+    <div class="container-params">
+        <h5>Parameters:</h5>
+        
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>server</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+</dd>
+
+            
+                
+
+<dt>
+    
         <h4 class="name" id="setLock">
             
                 <span class="type-signature"></span>setLock<span class="signature">(server, duration)</span><span class="type-signature"></span>
@@ -869,7 +1147,7 @@ We use this to get the latest lines so we don't start with logs from server boot
             
             <div class="container-source members">
                 <code><a href="EventGetter.js.html">EventGetter.js</a></code>,
-                <code><a href="EventGetter.js.html#line91">line 91</a></code>
+                <code><a href="EventGetter.js.html#line113">line 113</a></code>
             </div>
             
         </h4>
