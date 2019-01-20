@@ -189,10 +189,16 @@ class EventGetter {
 
     async getLatestLogLine(server) {
         let result = await redisClient.get('latestLogLine', server);
+
+
+        if (_.isNull(result)) {
+            result = await this.updateLatestLogLine(server);
+        }
+
         let resultCheck = _.isNaN(parseInt(result));
 
         if (resultCheck) {
-            throw new Error(`Unexpected data from redis: "result"`);
+            throw new Error(`Unexpected data from redis: "${result}"`);
         }
 
         return parseInt(result);
