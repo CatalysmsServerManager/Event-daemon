@@ -2,11 +2,19 @@ const geoip = require('geoip-ultralight');
 const _ = require('lodash');
 const logger = require('../Logger');
 
-module.exports = function handleLogLine(logLine) {
+/**
+ * Extracts info from a log line from 7d2d and transforms it into a useable data object
+ * @param {Object} logLine Response from a 7d2d server
+ */
+const handleLogLine = function handleLogLine(logLine) {
 
   const returnValue = {
     type: undefined,
     data: undefined
+  }
+
+  if (!_.isString(logLine.msg)) {
+    throw new Error(`Invalid properties for logLine`);
   }
 
   if (_.startsWith(logLine.msg, 'Time:')) {
@@ -81,63 +89,25 @@ module.exports = function handleLogLine(logLine) {
       return;
     }
 
-    returnValue.type = 'chatMessage';
-    returnValue.data = data;
-  }
-
-  // pre A17 chat
-  if (_.startsWith(logLine.msg, 'Chat:')) {
-    /*
-    {
-      "date": "2017-11-14",
-      "time": "14:50:39",
-      "uptime": "123.278",
-      "msg": "Chat: 'Catalysm': hey",
-      "trace": "",
-      "type": "Log"
-    }
-    */
-
-    let firstIdx = logLine.msg.indexOf('\'');
-    let secondIdx = logLine.msg.indexOf('\'', firstIdx + 1)
-    let playerName = logLine.msg.slice(firstIdx + 1, secondIdx)
-    let messageText = logLine.msg.slice(secondIdx + 3, logLine.msg.length)
-
-    let date = logLine.date
-    let time = logLine.time
-    let type = "chat"
-    if (playerName == 'Server') {
-      type = "server"
-    }
-
     /*
     Workaround for when the server uses servertools roles
-    Server tools 
     */
-    if (playerName.includes('[-]') && playerName.includes("](")) {
-      let roleColourDividerIndex = playerName.indexOf("](")
-      let roleEndIndex = playerName.indexOf(")", roleColourDividerIndex);
-      let newPlayerName = playerName.substring(roleEndIndex + 2).replace('[-]', '');
-      playerName = newPlayerName;
+    if (data.playerName.includes('[-]') && data.playerName.includes("](")) {
+      let roleColourDividerIndex = data.playerName.indexOf("](")
+      let roleEndIndex = data.playerName.indexOf(")", roleColourDividerIndex);
+      let newPlayerName = data.playerName.substring(roleEndIndex + 2).replace('[-]', '');
+      data.playerName = newPlayerName;
     }
 
     /**
-     * Workaround for coppi colours (with the colour ending indicator [-])
+     * Workaround for CPM colours (with the colour ending indicator [-])
      */
 
-    if (playerName.includes('[-]')) {
-      let colourEndIdx = playerName.indexOf("]");
-      let newPlayerName = playerName.substring(colourEndIdx + 1).replace('[-]', '');
-      playerName = newPlayerName
+    if (data.playerName.includes('[-]')) {
+      let colourEndIdx = data.playerName.indexOf("]");
+      let newPlayerName = data.playerName.substring(colourEndIdx + 1).replace('[-]', '');
+      data.playerName = newPlayerName
     }
-
-    let data = {
-      playerName,
-      messageText,
-      type,
-      date,
-      time
-    };
 
     returnValue.type = 'chatMessage';
     returnValue.data = data;
@@ -250,3 +220,5 @@ module.exports = function handleLogLine(logLine) {
 
   return returnValue;
 };
+
+module.exports = handleLogLine;

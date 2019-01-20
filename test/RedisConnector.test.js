@@ -1,10 +1,10 @@
 const chai = require('chai')
 const expect = chai.expect
+const generateServer = require('./generators/generateServer');
+const redis = require('../src/RedisConnector');
+
 chai.use(require('chai-as-promised'));
 
-const generateServer = require('./generators/generateServer');
-
-const redis = require('../src/RedisConnector');
 describe('RedisConnector', () => {
 
     describe('#addToEventQueue', () => {
