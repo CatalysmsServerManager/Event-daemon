@@ -62,6 +62,9 @@ class EventGetter {
             this.activateFailed(server);
         }
 
+        // Reset the latest log line so we are up to date with server events after a reboot
+        this.updateLatestLogLine(server);
+
         await redisClient.set(`failedCounter`, currentFails, server);
         return;
     }
@@ -121,10 +124,12 @@ class EventGetter {
     async getNewLogs(server) {
         logger.verbose(`Get new logs for server ${server.id} - ${server.name}`);
         await this.setLock(server, this.defaultInterval);
+        server.latestLogLine = await this.getLatestLogLine(server);
 
         if (_.isUndefined(server.latestLogLine)) {
-            server.latestLogLine = await this.getLatestLogLine(server);
+            server.latestLogLine = await this.updateLatestLogLine(server);
         }
+
 
         let newLogs
         try {
@@ -139,7 +144,8 @@ class EventGetter {
             this.failedRequestHandler(server, error);
             return
         }
-        server.latestLogLine = server.latestLogLine + parseInt(newLogs.entries.length);
+
+        await this.setLatestLogLine(server, server.latestLogLine + parseInt(newLogs.entries.length));
 
         _.each(newLogs.entries, async line => {
             let parsedLogLine = handleLogLine(line);
@@ -148,21 +154,22 @@ class EventGetter {
                     id: server.id,
                     name: server.name
                 }
+                logger.verbose(`Detected event "${parsedLogLine.type} on server ${server.id} - ${JSON.stringify(parsedLogLine.data)}`);
                 redisClient.addToEventQueue(parsedLogLine)
             }
         });
 
         this.servers.set(server.id, server);
         this.resetFailedStatus(server);
-        logger.verbose(`Finished handling update for server ${server.id} - ${server.name}. Found ${newLogs.entries.length} new loglines.`);
+        logger.verbose(`Finished handling update for server ${server.id} - ${server.name}. Found ${newLogs.entries.length} new loglines. latestLogLine: ${server.latestLogLine}`);
     }
 
     /**
-     * Get the log line # of the server
+     * Update the log line # of the server
      * We use this to get the latest lines so we don't start with logs from server boot
      * @param { Object } server 
      */
-    async getLatestLogLine(server) {
+    async updateLatestLogLine(server) {
         try {
             const webUIUpdate = await SdtdApi.getWebUIUpdates({
                 ip: server.ip,
@@ -171,12 +178,34 @@ class EventGetter {
                 adminToken: server.authToken
             });
             server.latestLogLine = parseInt(webUIUpdate.newlogs) + 1;
-            this.servers.set(server.id, server);
-            return server.latestLogLine;
         } catch (error) {
             logger.warn(`Error when getting latest log line for server with ip ${server.ip} - ${error}`);
-            return 0;
+            server.latestLogLine = 0;
         }
+
+        await redisClient.set('latestLogLine', server.latestLogLine, server);
+        return server.latestLogLine;
+    }
+
+    async getLatestLogLine(server) {
+        let result = await redisClient.get('latestLogLine', server);
+        let resultCheck = _.isNaN(parseInt(result));
+
+        if (resultCheck) {
+            throw new Error(`Unexpected data from redis: "result"`);
+        }
+
+        return parseInt(result);
+    }
+
+    async setLatestLogLine(server, latestLogLine) {
+
+        if (!_.isFinite(latestLogLine)) {
+            throw new Error(`latestLogLine must be an integer`);
+        }
+
+        let result = await redisClient.set('latestLogLine', latestLogLine, server);
+        return result;
     }
 }
 
