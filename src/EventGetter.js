@@ -11,6 +11,7 @@ class EventGetter {
      */
     constructor(serverModel) {
         this.servers = new Map();
+        this.serverUpdateEmitter = redisClient.subscribe('serverUpdate');
         // Default time between attempts to get new events from a server
         this.defaultInterval = 2000;
         // When a server has consistently failed, we retry on a slower interval
@@ -24,6 +25,25 @@ class EventGetter {
         this.interval = setInterval(() => {
             this._intervalFunction();
         }, 2000);
+
+        this.serverUpdateEmitter.on('message', (channel, message) => {
+            if (channel === "serverUpdate") {
+                this.handleServerUpdate(JSON.parse(message));
+            }
+
+        })
+
+    }
+
+    handleServerUpdate(server) {
+        if (server.type === 'update') {
+            logger.info(`Server ${server.id} was updated`);
+            this.servers.set(server.id, server);
+        }
+        if (server.type === 'delete') {
+            logger.info(`Server ${server.id} was deleted`);
+            this.servers.delete(server.id);
+        }
     }
 
     /**

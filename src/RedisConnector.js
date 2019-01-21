@@ -9,6 +9,7 @@ class RedisConnector {
         this.client = new Redis({
             keyPrefix: 'eventDaemon:'
         });
+        this._subscriber = this.client.duplicate();
     }
 
     /**
@@ -72,6 +73,16 @@ class RedisConnector {
         }
         let result = await this.client.get(`server:${server.id}:${key}`);
         return result;
+    }
+
+    /**
+     * Subscribe to a redis channel
+     * @param {String} channel 
+     * @returns event emitter
+     */
+    subscribe(channel) {
+        this._subscriber.subscribe(channel);
+        return this._subscriber;
     }
 }
 
