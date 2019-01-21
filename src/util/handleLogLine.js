@@ -83,12 +83,6 @@ const handleLogLine = function handleLogLine(logLine) {
       messageText: splitMessage.slice(8).join(' ').replace(": ", "")
     };
 
-    // Filter out chatmessages that have been handled by some API mod already
-    if ((data.steamId === "-non-player-" && data.playerName !== 'Server') || data.entityId === "-1") {
-      logger.debug(`Discarding chat message because it's not from a player`, data);
-      return;
-    }
-
     /*
     Workaround for when the server uses servertools roles
     */
@@ -111,6 +105,13 @@ const handleLogLine = function handleLogLine(logLine) {
 
     returnValue.type = 'chatMessage';
     returnValue.data = data;
+
+    // Filter out chatmessages that have been handled by some API mod already
+    if ((data.steamId === "-non-player-" && data.playerName !== 'Server') || data.entityId === "-1") {
+      logger.debug(`Discarding chat message because it's not from a player`, data);
+      returnValue.type = 'logLine';
+      returnValue.data = logLine;
+    }
   }
 
   if (_.startsWith(logLine.msg, 'Player connected,')) {
