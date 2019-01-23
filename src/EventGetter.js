@@ -53,7 +53,10 @@ class EventGetter {
         for (const server of this.servers.values()) {
             let serverLock = await redisClient.get('lock', server);
             if (_.isNull(serverLock)) {
-                await this.getNewLogs(server);
+                // Set a lock for this server so no other instances start getting events while this is still running
+                await this.setLock(server, this.failedInterval);
+                // Do not await this so that failing servers do not block events from other servers
+                this.getNewLogs(server);
             }
         }
     }
@@ -143,7 +146,6 @@ class EventGetter {
      */
     async getNewLogs(server) {
         logger.verbose(`Getting new logs for server ${server.id} - ${server.name}`);
-        await this.setLock(server, this.defaultInterval);
         server.latestLogLine = await this.getLatestLogLine(server);
 
         if (_.isUndefined(server.latestLogLine) || _.isNull(server.latestLogLine)) {
@@ -159,7 +161,7 @@ class EventGetter {
                 adminUser: server.authName,
                 adminToken: server.authToken
             }, server.latestLogLine);
-
+            await this.setLock(server, this.defaultInterval);
         } catch (error) {
             this.failedRequestHandler(server, error);
             return
@@ -200,6 +202,7 @@ class EventGetter {
             server.latestLogLine = parseInt(webUIUpdate.newlogs) + 1;
         } catch (error) {
             logger.warn(`Error when getting latest log line for server with ip ${server.ip} - ${error}`);
+            this.failedRequestHandler(server);
             server.latestLogLine = 0;
         }
 
