@@ -8,3 +8,13 @@
 
 # WIP
 Gets events from a server and outputs to Redis
+
+# Installation
+
+
+## Redis
+
+Enable keyevent/keyspace events for EXPIRE. This is done with the command
+`CONFIG SET notify-keyspace-events KEx`
+
+Or you can set it inside redis.conf

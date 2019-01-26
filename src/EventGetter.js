@@ -11,31 +11,52 @@ class EventGetter {
      */
     constructor(serverModel) {
         this.servers = new Map();
-        this.serverUpdateEmitter = redisClient.subscribe('serverUpdate');
+        this.serverUpdateEmitter = redisClient.psubscribe('__key*__:*');
+        redisClient.subscribe('serverUpdate');
+        redisClient.subscribe('getLogs')
         // Default time between attempts to get new events from a server
         this.defaultInterval = 2000;
         // When a server has consistently failed, we retry on a slower interval
-        this.failedInterval = 60000;
+        this.failedInterval = 120000;
         serverModel.getAll().then(servers => {
             for (const server of servers) {
                 this.servers.set(server.id, server.dataValues);
             }
+            this.init();
         });
 
-        this.interval = setInterval(() => {
-            this._intervalFunction();
-        }, 2000);
 
-        this.serverUpdateEmitter.on('message', (channel, message) => {
+        this.serverUpdateEmitter.on('message', async (channel, message) => {
+            // logger.verbose(`Received message from redis on channel ${channel} and message: ${message}`)
             if (channel === "serverUpdate") {
+                logger.info(message)
                 this.handleServerUpdate(JSON.parse(message));
             }
 
-        })
+            if (channel === 'getLogs') {
+                const serverToGetLogs = await redisClient.spop('getLogs');
 
+                if (!_.isNull(serverToGetLogs)) {
+                    this.getNewLogs(serverToGetLogs);
+                }
+
+            }
+        });
+
+        this.serverUpdateEmitter.on('pmessage', (channel, message) => {
+            // logger.verbose(`Received message from redis on channel ${channel} and message: ${message}`);
+            // Lock has expired, we need to get new logs
+            if (message.includes('eventDaemon:server:') && message.includes(':lock')) {
+                const splitMessage = message.split(':');
+                const serverId = splitMessage[3];
+                const server = this.servers.get(parseInt(serverId));
+                redisClient.sadd('getLogs', server);
+            }
+        });
     }
 
     handleServerUpdate(server) {
+        logger.info(server)
         if (server.type === 'update') {
             logger.info(`Server ${server.id} was updated`);
             this.servers.set(server.id, server);
@@ -47,17 +68,11 @@ class EventGetter {
     }
 
     /**
-     * Heartbeat of this class
+     * Initialize log getting by checking all known servers
      */
-    async _intervalFunction() {
+    async init() {
         for (const server of this.servers.values()) {
-            let serverLock = await redisClient.get('lock', server);
-            if (_.isNull(serverLock)) {
-                // Set a lock for this server so no other instances start getting events while this is still running
-                await this.setLock(server, this.failedInterval);
-                // Do not await this so that failing servers do not block events from other servers
-                this.getNewLogs(server);
-            }
+            this.getNewLogs(server);
         }
     }
 
@@ -145,13 +160,21 @@ class EventGetter {
      * @param {Object} server 
      */
     async getNewLogs(server) {
-        logger.verbose(`Getting new logs for server ${server.id} - ${server.name}`);
+        const serverLock = await redisClient.get('lock', server);
+        if (!_.isNull(serverLock)) {
+            return;
+        }
+        logger.debug(`Getting new logs for server ${server.id} - ${server.name}`);
+
+        // Set a lock for this server so no other instances start getting events while this is still running
+        await this.setLock(server, this.failedInterval);
+
+
         server.latestLogLine = await this.getLatestLogLine(server);
 
         if (_.isUndefined(server.latestLogLine) || _.isNull(server.latestLogLine)) {
             server.latestLogLine = await this.updateLatestLogLine(server);
         }
-
 
         let newLogs
         try {

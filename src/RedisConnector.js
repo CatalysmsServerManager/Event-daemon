@@ -27,9 +27,48 @@ class RedisConnector {
             throw new Error('Must provide a server property');
         }
 
-        let queueLength = await this.client.rpush(`eventQueue`, JSON.stringify(event));
-        await this.client.publish('eventQueue', 'new');
+        let queueLength = await this.rpush(`eventQueue`, event);
         return parseInt(queueLength);
+    }
+
+    /**
+     * Push an object into a list
+     * @param {String} list 
+     * @param {Object} object
+     */
+    async rpush(list, object) {
+        await this.client.rpush(list, JSON.stringify(object));
+        await this.client.publish(list, 'new');
+        return;
+    }
+
+    /**
+     * Remove & return an element from a list
+     * @param {String} list 
+     */
+    async lpop(list) {
+        let result = await this.client.lpop(list);
+        return JSON.parse(result);
+    }
+
+    /**
+     * Add some object to a set
+     * @param {String} set Name of the set
+     * @param {Object} object JSON deserializable data
+     */
+    async sadd(set, object) {
+        await this.client.sadd(set, JSON.stringify(object));
+        await this.client.publish(set, 'new');
+        return;
+    }
+
+    /**
+     * Returns a random element from a set
+     * @param {String} set Name of the set
+     */
+    async spop(set) {
+        let result = await this.client.spop(set);
+        return JSON.parse(result);
     }
 
     /**
@@ -82,6 +121,16 @@ class RedisConnector {
      */
     subscribe(channel) {
         this._subscriber.subscribe(channel);
+        return this._subscriber;
+    }
+
+    /**
+     * Subscribe to a redis pattern
+     * @param {String} pattern 
+     * @returns event emitter
+     */
+    psubscribe(pattern) {
+        this._subscriber.psubscribe(pattern);
         return this._subscriber;
     }
 }
